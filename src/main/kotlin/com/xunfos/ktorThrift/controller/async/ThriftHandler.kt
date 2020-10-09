@@ -1,5 +1,6 @@
 package com.xunfos.ktorThrift.controller.async
 
+import com.xunfos.ktorThrift.controller.ThriftContract
 import com.xunfos.playground.thrift.GetUserRequest
 import com.xunfos.playground.thrift.GetUserResponse
 import com.xunfos.playground.thrift.GetUsersResponse
@@ -10,7 +11,7 @@ import com.xunfos.sbpplayground.util.trace
 import org.apache.thrift.async.AsyncMethodCallback
 import kotlin.random.Random
 
-class ThriftHandler : PlaygroundService.AsyncIface {
+class ThriftHandler : PlaygroundService.AsyncIface, ThriftContract {
     private val rng = Random(System.currentTimeMillis())
 
     override fun ping(resultHandler: AsyncMethodCallback<PingResponse>) {

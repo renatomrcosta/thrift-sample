@@ -1,5 +1,6 @@
 package com.xunfos.ktorThrift.controller.sync
 
+import com.xunfos.ktorThrift.controller.ThriftContract
 import com.xunfos.playground.thrift.GetUserRequest
 import com.xunfos.playground.thrift.GetUserResponse
 import com.xunfos.playground.thrift.GetUsersResponse
@@ -9,7 +10,7 @@ import com.xunfos.playground.thrift.User
 import com.xunfos.sbpplayground.util.trace
 import kotlin.random.Random
 
-class ThriftHandler : PlaygroundService.Iface {
+class ThriftHandler : PlaygroundService.Iface, ThriftContract {
     private val rng = Random(System.currentTimeMillis())
 
     override fun ping(): PingResponse {

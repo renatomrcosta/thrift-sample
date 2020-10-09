@@ -1,28 +1,67 @@
 package com.xunfos.ktorThrift
 
-import com.fasterxml.jackson.databind.SerializationFeature
-import io.ktor.application.call
-import io.ktor.application.install
-import io.ktor.features.ContentNegotiation
-import io.ktor.jackson.jackson
-import io.ktor.response.respondText
-import io.ktor.routing.get
-import io.ktor.routing.routing
+import com.linecorp.armeria.common.HttpResponse
+import com.linecorp.armeria.common.SessionProtocol
+import com.linecorp.armeria.server.Server
+import com.linecorp.armeria.server.thrift.THttpService
+import com.xunfos.ktorThrift.controller.ThriftContract
+import io.ktor.util.KtorExperimentalAPI
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import java.time.Duration
+import com.xunfos.ktorThrift.controller.async.ThriftHandler as AsyncHandler
+import com.xunfos.ktorThrift.controller.coroutines.ThriftHandler as CoHandler
+import com.xunfos.ktorThrift.controller.sync.ThriftHandler as SyncHandler
 
-fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
+@KtorExperimentalAPI
+fun main(args: Array<String>) {
+    configureArmeria()
+}
 
-@Suppress("unused") // Referenced in application.conf
-@kotlin.jvm.JvmOverloads
-fun io.ktor.application.Application.module(testing: Boolean = false) {
-    install(ContentNegotiation) {
-        jackson {
-            enable(SerializationFeature.INDENT_OUTPUT)
+fun configureArmeria() {
+    val syncServer = configureServer("/api", 7070, SyncHandler())
+    val asyncServer = configureServer("/api", 8080, AsyncHandler())
+    val coServer = configureServer("/api", 9090, CoHandler())
+
+    runBlocking {
+        launch {
+            syncServer.build().start()
         }
-    }
-
-    routing {
-        get("/health") {
-            call.respondText("OK!")
+        launch {
+            asyncServer.build().start()
+        }
+        launch {
+            coServer.build().start()
         }
     }
 }
+
+fun configureServer(route: String, port: Int, handler: ThriftContract) = Server.builder()
+    .service(route, THttpService.of(handler))
+    .port(port, SessionProtocol.HTTP)
+    .requestTimeout(Duration.ofSeconds(2))
+    .serviceUnder("/health") { _, _ ->
+        HttpResponse.of("OK")
+    }
+
+//
+// suspend fun configureSocket() = coroutineScope {
+//     val server = aSocket(ActorSelectorManager(Dispatchers.Default)).tcp().bind(InetSocketAddress(8081))
+//     while(isActive) {
+//         val socket = server.accept()
+//         launch {
+//             val input = socket.openReadChannel()
+//             val output = socket.openWriteChannel(true)
+//         }
+//     }
+// }
+// fun configForNow() {
+//     val asyncProcessor = PlaygroundService.AsyncProcessor<PlaygroundService.AsyncIface>(AsyncHandler())
+//     val coProcessor = PlaygroundService.AsyncProcessor<PlaygroundService.AsyncIface>(CoHandler())
+// }
+//
+// fun configureThrift() {
+//     val processor = PlaygroundService.Processor<PlaygroundService.Iface>(SyncHandler())
+//     val protocolFactory = TBinaryProtocol.Factory()
+//     val servlet = TServlet(processor, protocolFactory)
+// }

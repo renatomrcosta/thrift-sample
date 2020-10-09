@@ -1,5 +1,6 @@
 package com.xunfos.ktorThrift.controller.coroutines
 
+import com.xunfos.ktorThrift.controller.ThriftContract
 import com.xunfos.playground.thrift.GetUserRequest
 import com.xunfos.playground.thrift.GetUserResponse
 import com.xunfos.playground.thrift.GetUsersResponse
@@ -14,7 +15,7 @@ import org.apache.thrift.async.AsyncMethodCallback
 import java.util.concurrent.Executors
 import kotlin.random.Random
 
-class ThriftHandler : PlaygroundService.AsyncIface {
+class ThriftHandler : PlaygroundService.AsyncIface, ThriftContract {
     private val rng = Random(System.currentTimeMillis())
     private val thriftHandlerCoroutineScope =
         CoroutineScope(
