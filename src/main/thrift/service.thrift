@@ -1,5 +1,6 @@
 namespace java com.xunfos.playground.thrift
 
+
 struct User {
     1: string id
     2: string name

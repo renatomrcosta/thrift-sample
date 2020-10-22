@@ -2,6 +2,7 @@ package com.xunfos.ktorThrift
 
 import com.linecorp.armeria.common.HttpResponse
 import com.linecorp.armeria.common.SessionProtocol
+import com.linecorp.armeria.common.thrift.ThriftSerializationFormats
 import com.linecorp.armeria.server.Server
 import com.linecorp.armeria.server.thrift.THttpService
 import com.xunfos.ktorThrift.controller.ThriftContract
@@ -37,9 +38,9 @@ fun configureArmeria() {
 }
 
 fun configureServer(route: String, port: Int, handler: ThriftContract) = Server.builder()
-    .service(route, THttpService.of(handler))
+    .service(route, THttpService.of(handler, ThriftSerializationFormats.JSON))
     .port(port, SessionProtocol.HTTP)
-    .requestTimeout(Duration.ofSeconds(2))
+    .requestTimeout(Duration.ofSeconds(5000))
     .serviceUnder("/health") { _, _ ->
         HttpResponse.of("OK")
     }

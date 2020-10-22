@@ -10,6 +10,7 @@ import com.xunfos.playground.thrift.User
 import com.xunfos.sbpplayground.util.trace
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.apache.thrift.async.AsyncMethodCallback
 import java.util.concurrent.Executors
@@ -19,7 +20,7 @@ class ThriftHandler : PlaygroundService.AsyncIface, ThriftContract {
     private val rng = Random(System.currentTimeMillis())
     private val thriftHandlerCoroutineScope =
         CoroutineScope(
-            Executors.newFixedThreadPool(8).asCoroutineDispatcher()
+            Executors.newWorkStealingPool().asCoroutineDispatcher()
         )
 
     override fun ping(resultHandler: AsyncMethodCallback<PingResponse>) {
@@ -34,7 +35,8 @@ class ThriftHandler : PlaygroundService.AsyncIface, ThriftContract {
             val workId = rng.nextLong()
 
             trace("[workId: $workId] Starting getUser Fun. ${WORK_TIME}ms of work")
-            Thread.sleep(WORK_TIME)
+            // Thread.sleep(WORK_TIME)
+            delay(WORK_TIME)
             trace("[workId: $workId] Finishing getUser Fun.")
 
             // Suppose a query would be made
@@ -48,19 +50,21 @@ class ThriftHandler : PlaygroundService.AsyncIface, ThriftContract {
     }
 
     override fun getUsers(resultHandler: AsyncMethodCallback<GetUsersResponse>) {
-        val workId = rng.nextLong()
+        thriftHandlerCoroutineScope.launch {
+            val workId = rng.nextLong()
 
-        trace("[workId: $workId] Starting getUsers Fun. ${WORK_TIME}ms of work")
-        Thread.sleep(WORK_TIME)
-        trace("[workId: $workId] Finishing getUsers Fun.")
+            trace("[workId: $workId] Starting getUsers Fun. ${WORK_TIME}ms of work")
+            delay(WORK_TIME)
+            trace("[workId: $workId] Finishing getUsers Fun.")
 
-        resultHandler.onComplete(GetUsersResponse().apply {
-            this.users = listOf(
-                User().apply {
-                    this.id = "1"
-                    this.name = "banana"
-                })
-        })
+            resultHandler.onComplete(GetUsersResponse().apply {
+                this.users = listOf(
+                    User().apply {
+                        this.id = "1"
+                        this.name = "banana"
+                    })
+            })
+        }
     }
 
     companion object {
