@@ -37,7 +37,7 @@ dependencies {
     implementation("io.ktor:ktor-jackson:1.3.2")
     implementation("org.apache.thrift:libthrift:0.13.0")
 
-    implementation("com.linecorp.armeria:armeria:0.99.7")
+    implementation("com.linecorp.armeria:armeria:1.2.0")
     implementation("com.linecorp.armeria:armeria-thrift:0.99.7")
 
 }
