@@ -29,7 +29,7 @@ configure<SourceSetContainer> {
 
 
 dependencies {
-    val armeriaVersion = "1.2.0"
+    val armeriaVersion = "1.8.0"
     implementation(kotlin("stdlib"))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2")
     implementation("ch.qos.logback:logback-classic:1.2.3")
